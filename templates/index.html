@@ -45,7 +45,8 @@
         if (option === 'search') {
             document.getElementById('search_query').style.display = 'block';
             document.getElementById('url').style.display = 'none';
-            document.getElementById('file_type_select').style.display = none;
+            document.getElementById('file_type_select').style.display = 'none';
+            document.getElementById('is_playlist_select').style.display = 'none';
             document.getElementById('search_query').focus();
             submitButton.textContent = 'Buscar';
             formAction = '/';
@@ -55,6 +56,7 @@
             document.getElementById('search_query').style.display = 'none';
             document.getElementById('url').style.display = 'block';
             document.getElementById('file_type_select').style.display = 'block';
+            document.getElementById('is_playlist_select').style.display = 'block';
             document.getElementById('url').focus();
             submitButton.textContent = 'Descargar';
             formAction = '/download'; 
