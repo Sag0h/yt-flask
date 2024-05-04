@@ -1,0 +1,5 @@
+# Ignorar todos los archivos ZIP
+*.zip
+
+# Ignorar una carpeta específica
+downloads/

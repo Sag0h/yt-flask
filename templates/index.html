@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YTDOWNLOADv2</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<h1>YTDOWNLOADv2</h1>
+
+<a id="download-link" href="{{ url_for('index', file_path=file_path) }}" style="display: none;"></a>
+
+<div class="download_song_video_div">
+    <form action="/" method="post" id="download_form">
+        <select class="inputs" id="option_select" name="option">
+            <option value="url">URL</option>
+            <option value="search">Búsqueda</option>
+        </select>
+
+        <input class="inputs" type="text" name="search_query" id="search_query" placeholder="Buscar" style="display: none;">
+        <input class="inputs" type="url" name="url" id="url" placeholder="Ingrese URL">
+
+        <select class="inputs" name="file_type" id="file_type_select">
+            <option value="video">MP4</option>
+            <option value="song">MP3</option>
+        </select>
+
+        <select class="inputs" name="is_playlist" id="is_playlist_select">
+            <option value="no" selected>No</option>
+            <option value="yes">Sí</option>
+        </select>
+
+        <button class="inputs" type="submit" id="submit_button">Descargar</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('option_select').addEventListener('change', function() {
+        var option = this.value;
+        var submitButton = document.getElementById('submit_button');
+        var formAction = '/';
+
+        if (option === 'search') {
+            document.getElementById('search_query').style.display = 'block';
+            document.getElementById('url').style.display = 'none';
+            document.getElementById('file_type_select').style.display = none;
+            document.getElementById('search_query').focus();
+            submitButton.textContent = 'Buscar';
+            formAction = '/';
+            document.getElementById('url').removeAttribute('required');
+            document.getElementById('search_query').setAttribute('required', true);
+        } else if (option === 'url') {
+            document.getElementById('search_query').style.display = 'none';
+            document.getElementById('url').style.display = 'block';
+            document.getElementById('file_type_select').style.display = 'block';
+            document.getElementById('url').focus();
+            submitButton.textContent = 'Descargar';
+            formAction = '/download'; 
+            document.getElementById('search_query').removeAttribute('required');
+            document.getElementById('url').setAttribute('required', true);
+        }
+
+        document.getElementById('download_form').action = formAction;
+    });
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+        var downloadLink = document.getElementById('download-link');
+        var filePath = "{{ file_path }}"; // Obtener el valor de video_path del template
+        
+        if (filePath && filePath !== "error") {
+            downloadLink.click();
+        }
+    });
+</script>
+</body>
+</html>
