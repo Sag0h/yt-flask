@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YTDOWNLOADv2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 <body>
 
@@ -12,29 +16,56 @@
 
 <a id="download-link" href="{{ url_for('index', file_path=file_path) }}" style="display: none;"></a>
 
-<div class="download_song_video_div">
+<div class="search_bar">
     <form action="/" method="post" id="download_form">
         <select class="inputs" id="option_select" name="option">
-            <option value="url">URL</option>
             <option value="search">Búsqueda</option>
+            <option value="url">URL</option>
         </select>
 
-        <input class="inputs" type="text" name="search_query" id="search_query" placeholder="Buscar" style="display: none;">
-        <input class="inputs" type="url" name="url" id="url" placeholder="Ingrese URL">
+        <input class="inputs" type="text" name="search_query" id="search_query" placeholder="Buscar">
+        <input class="inputs" type="url" name="url" id="url" placeholder="Ingrese URL" style="display: none;">
 
-        <select class="inputs" name="file_type" id="file_type_select">
+        <select class="inputs" name="file_type" id="file_type_select" style="display:none;">
             <option value="video">MP4</option>
             <option value="song">MP3</option>
         </select>
 
-        <select class="inputs" name="is_playlist" id="is_playlist_select">
-            <option value="no" selected>No</option>
-            <option value="yes">Sí</option>
-        </select>
-
-        <button class="inputs" type="submit" id="submit_button">Descargar</button>
+        <button class="inputs" type="submit" id="submit_button">Buscar</button>
     </form>
+
+    <div class="content">
+
+        <div class="results">
+            {% for video in results %}
+            <div class="video">
+                <a class="youtubevideo" href={{ video.url }}">
+
+                    <div class="thumbnail_container">
+                        <img src="{{ video.thumbnail_url }}" alt="Thumbnail">
+                    </div>
+            
+                    <div class="title_container">
+                        <h2>{{ video.title }}</h2>
+                    </div>
+
+                </a>
+                <div class="info_container">
+                    <p>Duración: {{ video.duration }} segundos</p>
+                    <p class="channel">Canal: {{ video.author }}</p>
+                </div>
+                <div class="download_container">
+                    <button onclick="submitForm('{{ video.url }}', 'video')">Descargar MP4</button>
+                    <button onclick="submitForm('{{ video.url }}', 'song')">Descargar MP3</button>                
+                </div>    
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+
 </div>
+
 
 <script>
     document.getElementById('option_select').addEventListener('change', function() {
@@ -46,7 +77,6 @@
             document.getElementById('search_query').style.display = 'block';
             document.getElementById('url').style.display = 'none';
             document.getElementById('file_type_select').style.display = 'none';
-            document.getElementById('is_playlist_select').style.display = 'none';
             document.getElementById('search_query').focus();
             submitButton.textContent = 'Buscar';
             formAction = '/';
@@ -56,10 +86,9 @@
             document.getElementById('search_query').style.display = 'none';
             document.getElementById('url').style.display = 'block';
             document.getElementById('file_type_select').style.display = 'block';
-            document.getElementById('is_playlist_select').style.display = 'block';
             document.getElementById('url').focus();
             submitButton.textContent = 'Descargar';
-            formAction = '/download'; 
+            formAction = '/'; 
             document.getElementById('search_query').removeAttribute('required');
             document.getElementById('url').setAttribute('required', true);
         }
@@ -68,7 +97,7 @@
     });
 
 
-        document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
         var downloadLink = document.getElementById('download-link');
         var filePath = "{{ file_path }}"; // Obtener el valor de video_path del template
         
@@ -76,6 +105,45 @@
             downloadLink.click();
         }
     });
+
+    function submitForm(url, fileType) {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ url_for('index') }}';
+            
+            var searchInput = document.createElement('input');
+            searchInput.type = 'hidden';
+            searchInput.name = 'option';
+            searchInput.value = 'url';
+            form.appendChild(searchInput);
+    
+            var fromSearchInput = document.createElement('input');
+            fromSearchInput.type = 'hidden';
+            fromSearchInput.name = 'from_search';
+            fromSearchInput.value = 'True';
+            form.appendChild(fromSearchInput);
+    
+            var urlInput = document.createElement('input');
+            urlInput.type = 'hidden';
+            urlInput.name = 'url';
+            urlInput.value = url;
+            form.appendChild(urlInput);
+    
+            var fileTypeInput = document.createElement('input');
+            fileTypeInput.type = 'hidden';
+            fileTypeInput.name = 'file_type';
+            fileTypeInput.value = fileType;
+            form.appendChild(fileTypeInput);
+    
+            var isSearchInput = document.createElement('input');
+            isSearchInput.type = 'hidden';
+            isSearchInput.name = 'is_search';
+            isSearchInput.value = 'yes';
+            form.appendChild(isSearchInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
 </script>
 </body>
 </html>
