@@ -76,6 +76,14 @@ h1{
     align-items: center;
 
 }
+.header-res{
+    color: white;
+    font-size: 1.7em;
+    width: 100%;
+    text-align: center;
+    font-weight: 400;
+    margin-bottom: 5%;
+}
 
 .results{
     font-family:Roboto;
@@ -131,7 +139,7 @@ h1{
     background-color: black;
     border-radius: 10px;
     border: solid 0px black;
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.5);
 }
 
 .thumbnail_container img {
@@ -149,7 +157,8 @@ h1{
     align-items:normal;
     justify-content: start;
     width: 58%;
-    height: 100%;
+    height: 90%;
+    margin-top: 3px;
     font-size: 0.7em;
     color:white;
 }
@@ -157,7 +166,7 @@ h1{
 .info_container{
     display: flex;
     align-items: start;
-    justify-content: center;
+    justify-content: start;
     flex-direction: column;
     color:white;
     width: 20%;
@@ -166,15 +175,34 @@ h1{
     padding: 0 20px;
 }
 
+span{
+    color: #d62828;
+}
+
 .channel{
     font-size: 85%;
 }
 
 .download_container{
+    margin-top: 12%;
+    height: 80%;
     width: 20%;
     margin: 10px 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-around;
+    justify-content: start;
+}
+
+.download_container button{
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #d62828;
+    margin: 5px 0;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+}
+
+button:hover{
+    background-color: #d62828;
+    color: white;
 }

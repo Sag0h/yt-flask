@@ -4,6 +4,8 @@ from moviepy.audio.io.AudioFileClip import AudioFileClip
 import os
 from datetime import datetime, timedelta
 import zipfile
+
+import unicodedata
 import re
 
 download_path = "downloads/"
@@ -14,23 +16,31 @@ def clean_filename(filename):
     cleaned_filename = re.sub(r'[^a-zA-Z0-9\.\-\\/ ]', '', filename)
     return cleaned_filename
 
+
 def clean_videoname(filename):
-    # Verificar si hay un punto en el nombre del archivo
+    # Eliminar acentos y convertir a minúsculas
+    cleaned_name = ''.join(c for c in unicodedata.normalize('NFD', filename.lower()) if unicodedata.category(c) != 'Mn')
+    # Eliminar caracteres especiales excepto letras, espacios, punto y números
+    cleaned_filename = re.sub(r'[^\w\s.\d]', '', cleaned_name)
+    # Reemplazar múltiples espacios con uno solo
+    cleaned_filename = re.sub(r'\s+', ' ', cleaned_filename)
+    # Eliminar espacios al inicio y al final
+    cleaned_filename = cleaned_filename.strip()
+    # Verificar si el nombre del archivo se ha limpiado por completo
+    if not cleaned_filename:
+        # Si el nombre del archivo se ha limpiado completamente, cambiarlo a 'video'
+        cleaned_filename = 'video'
+    # Agregar lógica para mantener las extensiones de archivo .mp3, .mp4, etc.
     if '.' in filename:
         # Dividir el nombre del archivo en nombre y extensión
-        name, extension = filename.rsplit('.', 1)
-        # Remover caracteres especiales del nombre del archivo
-        cleaned_name = re.sub(r'[^\w\s.-]', '', name)
-        # Reemplazar múltiples espacios con uno solo
-        cleaned_name = re.sub(r'\s+', ' ', cleaned_name)
-        # Volver a unir el nombre del archivo con su extensión
-        cleaned_filename = cleaned_name.strip() + '.' + extension
-    else:
-        # Si no hay punto, solo remover caracteres especiales
-        cleaned_filename = re.sub(r'[^\w\s.-]', '', filename)
-        # Reemplazar múltiples espacios con uno solo
-        cleaned_filename = re.sub(r'\s+', ' ', cleaned_filename)
-        cleaned_filename = cleaned_filename.strip()
+        name, extension = cleaned_filename.rsplit('.', 1)
+        # Verificar si la extensión es una extensión de archivo válida
+        if extension.lower() in ['.mp3', '.mp4']:
+            # Si es una extensión válida, mantener el nombre del archivo y la extensión
+            cleaned_filename = name + '.' + extension.lower()
+        else:
+            # Si no es una extensión válida, mantener solo el nombre del archivo
+            cleaned_filename = name
     cleaned_filename = remove_emojis(cleaned_filename)
     return cleaned_filename
 
@@ -131,45 +141,66 @@ def video_downloader(url):
     Args:
     - url (str): URL del video.
     """
-    clean_downloads() # Limpiar descargas antiguas para ahorrar espacio en disco. luego de 5 horas de descargado
+    # Limpiar descargas antiguas para ahorrar espacio en disco después de 5 horas de descargado
+    clean_downloads()
 
     try:
         video = pytube.YouTube(url)
     except pytube.exceptions.VideoUnavailable:
-        print("no se encontro el video de youtube")
+        print("No se encontró el video de YouTube")
         return "error"
 
     video_title = clean_videoname(video.title)
+    download_path = "/path/to/downloads"  # Reemplaza con la ruta real de descargas
 
     if not os.path.exists(download_path):
         os.makedirs(download_path)
 
+    # Filtrar y obtener la mejor resolución disponible del video
     found_video = video.streams.filter(progressive=True, file_extension='mp4').get_highest_resolution()
-    print(f"Downloading {video_title} from Youtube")
-    found_video.download(filename=video_title+".mp4", output_path=download_path)
-    video_path = download_path +video_title + ".mp4"
+
+    print(f"Descargando {video_title} desde YouTube")
+    
+    # Descargar el video con el nombre limpio y la extensión .mp4 en la ruta de descarga
+    found_video.download(filename=f"{video_title}.mp4", output_path=download_path)
+    
+    video_path = os.path.join(download_path, f"{video_title}.mp4")
     video_name = clean_filename(video_path)
-    print("Done.")
-    return f"{video_name}"
+    
+    print("¡Listo!")
+    
+    return video_name
 
 def song_downloader(url):
-    clean_downloads() # Limpiar descargas antiguas para ahorrar espacio en disco. luego de 5 horas de descargado
-    
+    # Limpiar descargas antiguas para ahorrar espacio en disco después de 5 horas de descargado
+    clean_downloads()
+
     try:
         song = pytube.YouTube(url)
     except pytube.exceptions.VideoUnavailable:
-        print("no se encontro el video de youtube")
+        print("No se encontró el video de YouTube")
         return "error"
 
+    # Obtener el nombre predeterminado del archivo de audio
     name = song.streams.get_audio_only().default_filename
-    namemp3 = clean_videoname(name.replace(".mp4", ".mp3"))
-    print(f"Downloading {song.title} from Youtube")
-    song.streams.get_audio_only().download(output_path=download_path)
-    print("Done.")
-    song_path = download_path + namemp3
+    name = clean_videoname(name+".mp4")
+    namemp3 = name.replace(".mp4", ".mp3")
+    
+    print(f"Descargando {song.title} desde YouTube")
+    
+    # Descargar el archivo de audio con el nombre limpio y la extensión .mp4 en la ruta de descarga
+    song.streams.get_audio_only().download(filename=name, output_path=download_path)
+    
+    print("¡Listo!")
+    
+    song_path = os.path.join(download_path, namemp3)
     song_name = clean_filename(song_path)
-    convert_mp4_to_mp3(clean_filename(download_path+name), song_name)
+    
+    # Convertir el archivo descargado de mp4 a mp3
+    convert_mp4_to_mp3(clean_filename(download_path + name), song_name)
+    
     return song_name
+
 
 def playlist_downloader(filetype, url):
     playlist_path = download_path + "playlist/"

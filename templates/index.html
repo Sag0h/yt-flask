@@ -37,9 +37,10 @@
     <div class="content">
 
         <div class="results">
+            <h2 class="header-res">Resultados de la ultima busqueda</h2>
             {% for video in results %}
             <div class="video">
-                <a class="youtubevideo" href={{ video.url }}">
+                <a class="youtubevideo" href={{ video.url }}" title="Ver en Youtube">
 
                     <div class="thumbnail_container">
                         <img src="{{ video.thumbnail_url }}" alt="Thumbnail">
@@ -51,8 +52,8 @@
 
                 </a>
                 <div class="info_container">
-                    <p>Duración: {{ video.duration }} segundos</p>
-                    <p class="channel">Canal: {{ video.author }}</p>
+                    <p>Duración: {{ video.duration // 60 }} minutos y {{ video.duration % 60 }} segundos</p>
+                    <p class="channel">Canal: <span>{{ video.author }}</span></p>
                 </div>
                 <div class="download_container">
                     <button onclick="submitForm('{{ video.url }}', 'video')">Descargar MP4</button>
